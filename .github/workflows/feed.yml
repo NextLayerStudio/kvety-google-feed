@@ -1,0 +1,31 @@
+name: Denný feed
+
+on:
+  schedule:
+    - cron: "30 3 * * *"   # 4:30 SEČ / 5:30 SELČ
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency: feed
+
+jobs:
+  feed:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Vygenerovať feed
+        run: python3 kvety_feed.py kvety-google-feed.xml
+      - name: Uložiť zmeny
+        run: |
+          git config user.name "NextLayerStudio"
+          git config user.email "241285598+NextLayerStudio@users.noreply.github.com"
+          git add kvety-google-feed.xml
+          git diff --cached --quiet && echo "Bez zmien" && exit 0
+          git commit -m "Feed $(date -u +%F)"
+          git push
