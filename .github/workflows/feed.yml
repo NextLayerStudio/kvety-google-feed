@@ -25,7 +25,8 @@ jobs:
         run: |
           git config user.name "NextLayerStudio"
           git config user.email "241285598+NextLayerStudio@users.noreply.github.com"
-          git add kvety-google-feed.xml
-          git diff --cached --quiet && echo "Bez zmien" && exit 0
+          # Dátum behu udrží repo aktívne (GitHub inak po 60 dňoch vypne plánované behy).
+          date -u +%FT%TZ > posledny-beh.txt
+          git add kvety-google-feed.xml posledny-beh.txt
           git commit -m "Feed $(date -u +%F)"
           git push
