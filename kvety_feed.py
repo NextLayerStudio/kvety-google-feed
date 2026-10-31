@@ -15,6 +15,8 @@ UA = "Mozilla/5.0 (NLS Merchant feed; +https://nextlayer.studio)"
 # Alkohol vynechávame — v Shopping reklamách je obmedzený a hrozí zamietnutie účtu.
 EXCLUDE_CATEGORIES = {"vino", "s-vinom"}
 MIN_PRICE = 20.0
+# Darčekové koše/boxy s alkoholom, ktoré názov neprezradí (Google ich zamietol 31.10.2026).
+EXCLUDE_IDS = {"866525", "645455", "941655", "9115"}
 EXCLUDE_NAME = re.compile(r"vín(o|a|om)?\b|prosecco|šampan|sekt|\bpiv[oa]?\b|pivov|pivn|whisk|rum\b|likér|borovičk|slivovic", re.I)
 # Hlavné skupiny pre custom_label_0 (delenie PMax / Shopping podľa sortimentu).
 GROUPS = [  # regexy nad textom bez diakritiky; poradie = priorita
@@ -88,7 +90,7 @@ def build(products, seen_in):
     for pid, p in sorted(products.items()):
         eco = p.get("ecommerce") or {}
         cats = seen_in.get(pid, set())
-        if cats & EXCLUDE_CATEGORIES or EXCLUDE_NAME.search(p.get("name", "")):
+        if cats & EXCLUDE_CATEGORIES or EXCLUDE_NAME.search(p.get("name", "")) or str(eco.get("item_id") or pid) in EXCLUDE_IDS:
             skipped += 1
             continue
         price = num(p.get("thumbnail_price"), p.get("price") or eco.get("price") or 0)
